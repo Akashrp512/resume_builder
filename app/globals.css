@@ -1,26 +1,44 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Print styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm; /* Page margins */
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-resume #resumeContainer * {
+    visibility: visible;
+  }
+  
+  /* Position the resume with better spacing */
+  .print-resume #resumeContainer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 10mm; /* Add back some internal padding */
+    background-color: white;
+  }
+  
+  /* Make links clickable in PDF */
+  .print-resume #resumeContainer a {
+    color: #0000EE;
+    text-decoration: underline;
+  }
+  
+  /* Make email clickable */
+  .print-resume #resumeContainer .email-link {
+    color: #0000EE;
+    text-decoration: underline;
+  }
+  
+  /* Control page breaks */
+  .print-resume #resumeContainer .page-break {
+    page-break-before: always;
+  }
 }
