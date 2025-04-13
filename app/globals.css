@@ -1,10 +1,30 @@
 @import 'tailwindcss';
 
+/* Set Poppins as the default font */
+:root {
+  --font-poppins: 'Poppins', sans-serif;
+}
+
+body {
+  font-family: var(--font-poppins);
+}
+
+/* Resume specific font styles */
+#resumeContainer {
+  font-family: var(--font-poppins);
+}
+
+#resumeContainer h1, 
+#resumeContainer h2, 
+#resumeContainer h3 {
+  font-family: var(--font-poppins);
+}
+
 /* Print styles */
 @media print {
   @page {
     size: A4;
-    margin: 15mm; /* Page margins */
+    margin: 10mm; /* Changed from 15mm to 10mm for all sides */
   }
   
   body * {
@@ -40,5 +60,116 @@
   /* Control page breaks */
   .print-resume #resumeContainer .page-break {
     page-break-before: always;
+  }
+}
+
+/* Section reordering styles */
+.section-dragging {
+  opacity: 0.5;
+  background-color: #f0f9ff;
+  border: 2px dashed #3b82f6;
+}
+
+.section-drop-target {
+  border-top: 2px solid #3b82f6;
+}
+
+/* Editable section title styles */
+input.section-title-edit {
+  border: none;
+  border-bottom: 1px dashed #d1d5db;
+  background: transparent;
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  padding: 0.25rem 0;
+  width: 100%;
+}
+
+input.section-title-edit:focus {
+  outline: none;
+  border-bottom: 1px solid #3b82f6;
+}
+
+/* Sticky preview container */
+@media (min-width: 768px) {
+  .md\:sticky {
+    position: sticky;
+    top: 5rem;
+  }
+  
+  main.container {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+  }
+  
+  /* Custom scrollbar for better UX */
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f7fafc;
+    overflow-x: hidden;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: #f7fafc;
+    border-radius: 4px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background-color: #cbd5e0;
+    border-radius: 4px;
+  }
+  
+  .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background-color: #a0aec0;
+  }
+}
+
+/* Ensure the resume preview maintains proper dimensions */
+#resumeContainer {
+  min-height: min-content;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Container styles */
+.max-w-screen-2xl {
+  max-width: 1536px;
+}
+
+/* Fixed header and scrolling content */
+body {
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* Sticky header */
+header.sticky {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Improve scrollbar appearance */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+  overflow-x: hidden;
+}
+
+/* Ensure proper spacing in the layout */
+@media (min-width: 768px) {
+  .md\:sticky {
+    position: sticky;
+    top: 5rem;
+  }
+  
+  main.container {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
   }
 }

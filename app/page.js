@@ -6,6 +6,28 @@ export default function ResumeBuilder() {
   const resumeRef = useRef(null);
 
   const [formData, setFormData] = useState({
+    sectionTitles: {
+      personalInfo: 'Personal Information',
+      objective: 'Objective',
+      education: 'Education',
+      skills: 'Skills',
+      experience: 'Professional Experience',
+      internships: 'Internships',
+      certifications: 'Certifications',
+      projects: 'Projects',
+      achievements: 'Personal Achievements'
+    },
+    sectionOrder: [
+      'personalInfo',
+      'objective',
+      'education',
+      'skills',
+      'experience',
+      'internships',
+      'certifications',
+      'projects',
+      'achievements'
+    ],
     personalInfo: {
       name: 'John Doe',
       location: 'San Francisco, CA',
@@ -121,7 +143,6 @@ export default function ResumeBuilder() {
       document.body.classList.remove('print-resume');
     }, 500);
   };
-
 
   const handleNestedChange = (section, field, value) => {
     // Convert any non-string values to strings to avoid React child errors
@@ -268,9 +289,38 @@ export default function ResumeBuilder() {
     });
   };
 
+  const handleSectionTitleChange = (section, value) => {
+    setFormData(prevData => ({
+      ...prevData,
+      sectionTitles: {
+        ...prevData.sectionTitles,
+        [section]: value
+      }
+    }));
+  };
+
+  const moveSection = (section, direction) => {
+    const currentIndex = formData.sectionOrder.indexOf(section);
+    if (
+      (direction === 'up' && currentIndex > 0) ||
+      (direction === 'down' && currentIndex < formData.sectionOrder.length - 1)
+    ) {
+      const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+      const newOrder = [...formData.sectionOrder];
+
+      // Swap positions
+      [newOrder[currentIndex], newOrder[newIndex]] = [newOrder[newIndex], newOrder[currentIndex]];
+
+      setFormData({
+        ...formData,
+        sectionOrder: newOrder
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-white shadow p-4">
+      <header className="bg-white shadow p-4 sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">Resume Builder</h1>
           <button
@@ -283,13 +333,57 @@ export default function ResumeBuilder() {
         </div>
       </header>
 
-      <main className="flex-grow container mx-auto p-4 flex flex-col md:flex-row gap-6">
-        {/* Form Section */}
-        <div className="w-full md:w-2/5 bg-white shadow rounded-lg p-6 h-full overflow-y-auto">
+      <main className="flex-grow container mx-auto p-4 flex flex-col md:flex-row gap-6 max-w-screen-2xl">
+        {/* Form Section - Scrollable */}
+        <div className="w-full md:w-2/5 bg-white shadow rounded-lg p-6 max-h-[calc(100vh-100px)] overflow-y-auto">
           <div className="space-y-6">
+            {/* Section Order Controls */}
+            <div className="border-b pb-4">
+              <h2 className="text-lg font-semibold mb-4">Section Order</h2>
+              <p className="text-sm text-gray-600 mb-2">Drag sections to reorder them in your resume</p>
+              <div className="space-y-2">
+                {formData.sectionOrder.map((section, index) => (
+                  <div key={section} className="flex items-center justify-between bg-gray-50 p-2 rounded border">
+                    <div className="flex items-center">
+                      <span className="mr-2 text-gray-500">{index + 1}.</span>
+                      <input
+                        type="text"
+                        value={formData.sectionTitles[section]}
+                        onChange={(e) => handleSectionTitleChange(section, e.target.value)}
+                        className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium"
+                      />
+                    </div>
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => moveSection(section, 'up')}
+                        disabled={index === 0}
+                        className={`p-1 rounded ${index === 0 ? 'text-gray-300' : 'text-blue-500 hover:bg-blue-100'}`}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        onClick={() => moveSection(section, 'down')}
+                        disabled={index === formData.sectionOrder.length - 1}
+                        className={`p-1 rounded ${index === formData.sectionOrder.length - 1 ? 'text-gray-300' : 'text-blue-500 hover:bg-blue-100'}`}
+                      >
+                        ↓
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Personal Information */}
             <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                <input
+                  type="text"
+                  value={formData.sectionTitles.personalInfo}
+                  onChange={(e) => handleSectionTitleChange('personalInfo', e.target.value)}
+                  className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium w-full"
+                />
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -359,7 +453,14 @@ export default function ResumeBuilder() {
 
             {/* Objective */}
             <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-4">Objective</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                <input
+                  type="text"
+                  value={formData.sectionTitles.objective}
+                  onChange={(e) => handleSectionTitleChange('objective', e.target.value)}
+                  className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium w-full"
+                />
+              </h2>
               <textarea
                 value={formData.objective}
                 onChange={(e) => setFormData({ ...formData, objective: e.target.value })}
@@ -800,180 +901,182 @@ export default function ResumeBuilder() {
           </div>
         </div>
 
-        {/* Preview Section */}
-        <div className="w-full md:w-3/5">
+        {/* Preview Section - Sticky */}
+        <div className="w-full md:w-3/5 md:sticky md:top-20 self-start max-h-[calc(100vh-100px)] overflow-y-auto">
           <div
             ref={resumeRef}
             id="resumeContainer"
             className="bg-white shadow rounded-lg p-8"
             style={{
-              width: "800px",
+              width: "100%",
+              maxWidth: "800px",
               margin: "0 auto",
               backgroundColor: "white"
             }}
           >
-            {/* Resume Preview */}
-            <div className="mb-6 border-b pb-4">
-              <h1 className="text-2xl font-bold text-center">{formData.personalInfo.name}</h1>
-              <div className="text-center text-gray-600 mt-2">
-                <p>
-                  {ensureString(formData.personalInfo.location)} | {ensureString(formData.personalInfo.phone)} |
-                  <a
-                    href={`mailto:${ensureString(formData.personalInfo.email)}`}
-                    className="email-link"
-                  >
-                    {ensureString(formData.personalInfo.email)}
-                  </a>
-                </p>
-                <p>
-                  <a
-                    href={ensureString(formData.personalInfo.linkedin)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {ensureString(formData.personalInfo.linkedin)}
-                  </a>
-                </p>
-              </div>
-            </div>
+            {/* Render sections in the order specified by sectionOrder */}
+            {formData.sectionOrder.map((section) => {
+              switch (section) {
+                case 'personalInfo':
+                  return (
+                    <div key={section} className="mb-6 border-b pb-4">
+                      <h1 className="text-2xl font-bold text-center">{formData.personalInfo.name}</h1>
+                      <div className="text-center text-gray-600 mt-2">
+                        <p>
+                          {ensureString(formData.personalInfo.location)} | {ensureString(formData.personalInfo.phone)} |
+                          <a
+                            href={`mailto:${ensureString(formData.personalInfo.email)}`}
+                            className="email-link"
+                          >
+                            {ensureString(formData.personalInfo.email)}
+                          </a>
+                        </p>
+                        <p>
+                          <a
+                            href={ensureString(formData.personalInfo.linkedin)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {ensureString(formData.personalInfo.linkedin)}
+                          </a>
+                        </p>
+                      </div>
+                    </div>
+                  );
+                case 'objective':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.objective}</h2>
+                      <p className="text-sm">{formData.objective}</p>
+                    </div>
+                  );
+                case 'education':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.education}</h2>
+                      {formData.education.map((edu, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="flex justify-between">
+                            <h3 className="font-semibold">{edu.institution}</h3>
+                            <span className="text-sm">{edu.date}</span>
+                          </div>
+                          <p>{edu.degree}</p>
+                          <p className="text-sm">CGPA: {edu.cgpa}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                case 'skills':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.skills}</h2>
+                      <ul className="text-sm">
+                        <li className="mb-1"><span className="font-semibold">Languages:</span> {formData.skills.languages}</li>
+                        <li className="mb-1"><span className="font-semibold">Technologies:</span> {formData.skills.technologies}</li>
+                        <li className="mb-1"><span className="font-semibold">Tools:</span> {formData.skills.tools}</li>
+                        <li className="mb-1"><span className="font-semibold">Frameworks & Methodologies:</span> {formData.skills.frameworks}</li>
+                        <li className="mb-1"><span className="font-semibold">Soft Skills:</span> {formData.skills.softSkills}</li>
+                      </ul>
+                    </div>
+                  );
+                case 'experience':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.experience}</h2>
+                      {formData.experience.map((exp, index) => (
+                        <div key={index} className="mb-4">
+                          <div className="flex justify-between">
+                            <h3 className="font-semibold">{exp.company}</h3>
+                            <span className="text-sm">{exp.duration}</span>
+                          </div>
+                          <p className="italic mb-2">{exp.position}</p>
 
-            {/* Objective */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Objective</h2>
-              <p className="text-sm">{formData.objective}</p>
-            </div>
-
-            {/* Education */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Education</h2>
-              {formData.education.map((edu, index) => (
-                <div key={index} className="mb-3">
-                  <div className="flex justify-between">
-                    <h3 className="font-semibold">{edu.institution}</h3>
-                    <span className="text-sm">{edu.date}</span>
-                  </div>
-                  <p>{edu.degree}</p>
-                  <p className="text-sm">CGPA: {edu.cgpa}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Skills */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Skills</h2>
-              <ul className="text-sm">
-                <li className="mb-1"><span className="font-semibold">Languages:</span> {formData.skills.languages}</li>
-                <li className="mb-1"><span className="font-semibold">Technologies:</span> {formData.skills.technologies}</li>
-                <li className="mb-1"><span className="font-semibold">Tools:</span> {formData.skills.tools}</li>
-                <li className="mb-1"><span className="font-semibold">Frameworks & Methodologies:</span> {formData.skills.frameworks}</li>
-                <li className="mb-1"><span className="font-semibold">Soft Skills:</span> {formData.skills.softSkills}</li>
-              </ul>
-            </div>
-
-            {/* Professional Experience */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Professional Experience</h2>
-              {formData.experience.map((exp, index) => (
-                <div key={index} className="mb-4">
-                  <div className="flex justify-between">
-                    <h3 className="font-semibold">{exp.company}</h3>
-                    <span className="text-sm">{exp.duration}</span>
-                  </div>
-                  <p className="italic mb-2">{exp.position}</p>
-
-                  {exp.responsibilities.map((resp, respIndex) => (
-                    <div key={respIndex} className="mb-3">
-                      <p className="font-medium text-sm">{resp.title}</p>
+                          {exp.responsibilities.map((resp, respIndex) => (
+                            <div key={respIndex} className="mb-3">
+                              <p className="font-medium text-sm">{resp.title}</p>
+                              <ul className="list-disc ml-5 text-sm">
+                                {resp.points.map((point, pointIndex) => (
+                                  <li key={pointIndex} className="mb-1">{point}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                case 'internships':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.internships}</h2>
+                      {formData.internships.map((intern, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="flex justify-between">
+                            <h3 className="font-semibold">{intern.company}</h3>
+                            <span className="text-sm">{intern.duration}</span>
+                          </div>
+                          <p className="text-sm">{intern.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                case 'certifications':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.certifications}</h2>
                       <ul className="list-disc ml-5 text-sm">
-                        {resp.points.map((point, pointIndex) => (
-                          <li key={pointIndex} className="mb-1">{point}</li>
+                        {formData.certifications.map((cert, index) => (
+                          <li key={index} className="mb-1">{cert}</li>
                         ))}
                       </ul>
                     </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            {/* Internships */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Internships</h2>
-              {formData.internships.map((intern, index) => (
-                <div key={index} className="mb-3">
-                  <div className="flex justify-between">
-                    <h3 className="font-semibold">{intern.company}</h3>
-                    <span className="text-sm">{intern.duration}</span>
-                  </div>
-                  <p className="text-sm">{intern.description}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Certifications */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Certifications</h2>
-              <ul className="list-disc ml-5 text-sm">
-                {formData.certifications.map((cert, index) => (
-                  <li key={index} className="mb-1">{cert}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Projects */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Projects</h2>
-              {formData.projects.map((proj, index) => (
-                <div key={index} className="mb-3">
-                  <div className="flex justify-between">
-                    <h3 className="font-semibold">{proj.name} | {proj.technology}</h3>
-                    <span className="text-sm">{proj.date}</span>
-                  </div>
-                  {proj.link && (
-                    <p className="text-sm mb-1">
-                      <a
-                        href={proj.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        {proj.link}
-                      </a>
-                    </p>
-                  )}
-                  <ul className="list-disc ml-5 text-sm">
-                    {proj.description.map((desc, descIndex) => (
-                      <li key={descIndex} className="mb-1">{desc}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-
-            {/* Achievements */}
-            <div className="mb-6">
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Personal Achievements</h2>
-              <ul className="list-disc ml-5 text-sm">
-                {formData.achievements.map((achievement, index) => (
-                  <li key={index} className="mb-1">{achievement}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Personal Information */}
-            <div>
-              <h2 className="text-lg font-bold border-b pb-1 mb-2">Personal Information</h2>
-              <ul className="text-sm">
-                <li className="mb-1">
-                  <span className="font-semibold">Date of Birth:</span> {ensureString(formData.personalInfo.dob)}
-                </li>
-                <li className="mb-1">
-                  <span className="font-semibold">Languages Known:</span> {ensureString(formData.personalInfo.languages)}
-                </li>
-              </ul>
-            </div>
-
-            {/* Add this right before the "Personal Information" section */}
-            <div className="page-break"></div>
+                  );
+                case 'projects':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.projects}</h2>
+                      {formData.projects.map((proj, index) => (
+                        <div key={index} className="mb-3">
+                          <div className="flex justify-between">
+                            <h3 className="font-semibold">{proj.name} | {proj.technology}</h3>
+                            <span className="text-sm">{proj.date}</span>
+                          </div>
+                          {proj.link && (
+                            <p className="text-sm mb-1">
+                              <a
+                                href={proj.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline"
+                              >
+                                {proj.link}
+                              </a>
+                            </p>
+                          )}
+                          <ul className="list-disc ml-5 text-sm">
+                            {proj.description.map((desc, descIndex) => (
+                              <li key={descIndex} className="mb-1">{desc}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                case 'achievements':
+                  return (
+                    <div key={section} className="mb-6">
+                      <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.achievements}</h2>
+                      <ul className="list-disc ml-5 text-sm">
+                        {formData.achievements.map((achievement, index) => (
+                          <li key={index} className="mb-1">{achievement}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                default:
+                  return null;
+              }
+            })}
           </div>
         </div>
       </main>
