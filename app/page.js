@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef } from 'react';
-import { Download } from 'lucide-react';
+import { Download, Plus, Trash2, Edit2 } from 'lucide-react';
 
 export default function ResumeBuilder() {
   const resumeRef = useRef(null);
@@ -29,13 +29,15 @@ export default function ResumeBuilder() {
       'achievements'
     ],
     personalInfo: {
-      name: 'John Doe',
-      location: 'San Francisco, CA',
-      phone: '+1-555-123-4567',
-      email: 'johndoe@example.com',
-      linkedin: 'https://www.linkedin.com/in/johndoe',
-      dob: '01/01/1990',
-      languages: 'English, Spanish',
+      fields: [
+        { id: 'name', label: 'Name', value: 'John Doe', isRequired: true },
+        { id: 'location', label: 'Location', value: 'San Francisco, CA', isRequired: false },
+        { id: 'phone', label: 'Phone', value: '+1-555-123-4567', isRequired: false },
+        { id: 'email', label: 'Email', value: 'johndoe@example.com', isRequired: true },
+        { id: 'linkedin', label: 'LinkedIn', value: 'https://www.linkedin.com/in/johndoe', isRequired: false },
+        { id: 'dob', label: 'Date of Birth', value: '01/01/1990', isRequired: false },
+        { id: 'languages', label: 'Languages', value: 'English, Spanish', isRequired: false },
+      ]
     },
     objective: 'Dedicated software engineer with expertise in full-stack development and cloud technologies. Eager to leverage technical skills and problem-solving abilities to create innovative solutions that enhance user experience and drive business growth. Committed to continuous learning and staying current with emerging technologies.',
     education: [
@@ -47,11 +49,13 @@ export default function ResumeBuilder() {
       }
     ],
     skills: {
-      languages: 'JavaScript, TypeScript, Python, Java, SQL, HTML, CSS',
-      technologies: 'React, Node.js, Express, MongoDB, PostgreSQL',
-      tools: 'Git, Docker, AWS, VS Code, Figma, Jira',
-      frameworks: 'Next.js, Redux, Jest, Agile, Scrum',
-      softSkills: 'Communication, Teamwork, Problem-Solving, Time Management',
+      fields: [
+        { id: 'languages', label: 'Languages', value: 'JavaScript, TypeScript, Python, Java, SQL, HTML, CSS', isRequired: false },
+        { id: 'technologies', label: 'Technologies', value: 'React, Node.js, Express, MongoDB, PostgreSQL', isRequired: false },
+        { id: 'tools', label: 'Tools', value: 'Git, Docker, AWS, VS Code, Figma, Jira', isRequired: false },
+        { id: 'frameworks', label: 'Frameworks & Methodologies', value: 'Next.js, Redux, Jest, Agile, Scrum', isRequired: false },
+        { id: 'softSkills', label: 'Soft Skills', value: 'Communication, Teamwork, Problem-Solving, Time Management', isRequired: false },
+      ]
     },
     experience: [
       {
@@ -318,6 +322,65 @@ export default function ResumeBuilder() {
     }
   };
 
+  const addField = (section, defaultLabel = 'New Field') => {
+    const newId = `field_${Date.now()}`;
+    const newField = { id: newId, label: defaultLabel, value: '', isRequired: false };
+    
+    setFormData(prevData => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        fields: [...prevData[section].fields, newField]
+      }
+    }));
+  };
+
+  const removeField = (section, fieldId) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        fields: prevData[section].fields.filter(field => field.id !== fieldId)
+      }
+    }));
+  };
+
+  const updateFieldLabel = (section, fieldId, newLabel) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        fields: prevData[section].fields.map(field => 
+          field.id === fieldId ? { ...field, label: newLabel } : field
+        )
+      }
+    }));
+  };
+
+  const updateFieldValue = (section, fieldId, newValue) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        fields: prevData[section].fields.map(field => 
+          field.id === fieldId ? { ...field, value: newValue } : field
+        )
+      }
+    }));
+  };
+
+  const toggleFieldRequired = (section, fieldId) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [section]: {
+        ...prevData[section],
+        fields: prevData[section].fields.map(field => 
+          field.id === fieldId ? { ...field, isRequired: !field.isRequired } : field
+        )
+      }
+    }));
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <header className="bg-white shadow p-4 sticky top-0 z-10">
@@ -374,80 +437,67 @@ export default function ResumeBuilder() {
               </div>
             </div>
 
-            {/* Personal Information */}
+            {/* Personal Information - Now with customizable fields */}
             <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-4">
-                <input
-                  type="text"
-                  value={formData.sectionTitles.personalInfo}
-                  onChange={(e) => handleSectionTitleChange('personalInfo', e.target.value)}
-                  className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium w-full"
-                />
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">
                   <input
                     type="text"
-                    value={formData.personalInfo.name}
-                    onChange={(e) => handleNestedChange('personalInfo', 'name', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
+                    value={formData.sectionTitles.personalInfo}
+                    onChange={(e) => handleSectionTitleChange('personalInfo', e.target.value)}
+                    className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium w-full"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Location</label>
-                  <input
-                    type="text"
-                    value={formData.personalInfo.location}
-                    onChange={(e) => handleNestedChange('personalInfo', 'location', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
-                  <input
-                    type="text"
-                    value={formData.personalInfo.phone}
-                    onChange={(e) => handleNestedChange('personalInfo', 'phone', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
-                  <input
-                    type="email"
-                    value={formData.personalInfo.email}
-                    onChange={(e) => handleNestedChange('personalInfo', 'email', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
-                  <input
-                    type="text"
-                    value={formData.personalInfo.linkedin}
-                    onChange={(e) => handleNestedChange('personalInfo', 'linkedin', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                  <input
-                    type="text"
-                    value={formData.personalInfo.dob}
-                    onChange={(e) => handleNestedChange('personalInfo', 'dob', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Languages</label>
-                  <input
-                    type="text"
-                    value={formData.personalInfo.languages}
-                    onChange={(e) => handleNestedChange('personalInfo', 'languages', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
+                </h2>
+                <button
+                  onClick={() => addField('personalInfo')}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                >
+                  <Plus size={16} className="mr-1" /> Add Field
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {formData.personalInfo.fields.map((field) => (
+                  <div key={field.id} className="border rounded-md p-3 bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center">
+                        <input
+                          type="text"
+                          value={field.label}
+                          onChange={(e) => updateFieldLabel('personalInfo', field.id, e.target.value)}
+                          className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium"
+                        />
+                        {field.isRequired && (
+                          <span className="text-red-500 ml-1">*</span>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => toggleFieldRequired('personalInfo', field.id)}
+                          className={`p-1 rounded ${field.isRequired ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-600'}`}
+                          title={field.isRequired ? "Make Optional" : "Make Required"}
+                        >
+                          *
+                        </button>
+                        <button
+                          onClick={() => removeField('personalInfo', field.id)}
+                          className="p-1 rounded bg-red-100 text-red-600"
+                          disabled={field.isRequired}
+                          title={field.isRequired ? "Required fields cannot be removed" : "Remove field"}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      value={field.value}
+                      onChange={(e) => updateFieldValue('personalInfo', field.id, e.target.value)}
+                      className="mt-1 p-2 w-full border rounded-md"
+                      placeholder={`Enter ${field.label}`}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -530,55 +580,51 @@ export default function ResumeBuilder() {
               ))}
             </div>
 
-            {/* Skills */}
+            {/* Skills - Now with customizable fields */}
             <div className="border-b pb-4">
-              <h2 className="text-lg font-semibold mb-4">Skills</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">
+                  <input
+                    type="text"
+                    value={formData.sectionTitles.skills}
+                    onChange={(e) => handleSectionTitleChange('skills', e.target.value)}
+                    className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium w-full"
+                  />
+                </h2>
+                <button
+                  onClick={() => addField('skills', 'New Skill Category')}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm flex items-center"
+                >
+                  <Plus size={16} className="mr-1" /> Add Category
+                </button>
+              </div>
+              
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Languages</label>
-                  <input
-                    type="text"
-                    value={formData.skills.languages}
-                    onChange={(e) => handleNestedChange('skills', 'languages', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Technologies</label>
-                  <input
-                    type="text"
-                    value={formData.skills.technologies}
-                    onChange={(e) => handleNestedChange('skills', 'technologies', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Tools</label>
-                  <input
-                    type="text"
-                    value={formData.skills.tools}
-                    onChange={(e) => handleNestedChange('skills', 'tools', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Frameworks & Methodologies</label>
-                  <input
-                    type="text"
-                    value={formData.skills.frameworks}
-                    onChange={(e) => handleNestedChange('skills', 'frameworks', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Soft Skills</label>
-                  <input
-                    type="text"
-                    value={formData.skills.softSkills}
-                    onChange={(e) => handleNestedChange('skills', 'softSkills', e.target.value)}
-                    className="mt-1 p-2 w-full border rounded-md"
-                  />
-                </div>
+                {formData.skills.fields.map((field) => (
+                  <div key={field.id} className="border rounded-md p-3 bg-gray-50">
+                    <div className="flex justify-between items-center mb-2">
+                      <input
+                        type="text"
+                        value={field.label}
+                        onChange={(e) => updateFieldLabel('skills', field.id, e.target.value)}
+                        className="border-b border-dashed border-gray-300 bg-transparent px-1 font-medium"
+                      />
+                      <button
+                        onClick={() => removeField('skills', field.id)}
+                        className="p-1 rounded bg-red-100 text-red-600"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                    <textarea
+                      value={field.value}
+                      onChange={(e) => updateFieldValue('skills', field.id, e.target.value)}
+                      className="mt-1 p-2 w-full border rounded-md"
+                      placeholder={`Enter ${field.label} (comma separated)`}
+                      rows="2"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -920,26 +966,53 @@ export default function ResumeBuilder() {
                 case 'personalInfo':
                   return (
                     <div key={section} className="mb-6 border-b pb-4">
-                      <h1 className="text-2xl font-bold text-center">{formData.personalInfo.name}</h1>
+                      <h1 className="text-2xl font-bold text-center">
+                        {formData.personalInfo.fields.find(f => f.id === 'name')?.value || 'Your Name'}
+                      </h1>
                       <div className="text-center text-gray-600 mt-2">
                         <p>
-                          {ensureString(formData.personalInfo.location)} | {ensureString(formData.personalInfo.phone)} |
-                          <a
-                            href={`mailto:${ensureString(formData.personalInfo.email)}`}
-                            className="email-link"
-                          >
-                            {ensureString(formData.personalInfo.email)}
-                          </a>
+                          {formData.personalInfo.fields.find(f => f.id === 'location')?.value && 
+                            `${formData.personalInfo.fields.find(f => f.id === 'location').value} | `}
+                          {formData.personalInfo.fields.find(f => f.id === 'phone')?.value && 
+                            `${formData.personalInfo.fields.find(f => f.id === 'phone').value} | `}
+                          {formData.personalInfo.fields.find(f => f.id === 'email')?.value && (
+                            <a
+                              href={`mailto:${formData.personalInfo.fields.find(f => f.id === 'email').value}`}
+                              className="email-link"
+                            >
+                              {formData.personalInfo.fields.find(f => f.id === 'email').value}
+                            </a>
+                          )}
                         </p>
-                        <p>
-                          <a
-                            href={ensureString(formData.personalInfo.linkedin)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {ensureString(formData.personalInfo.linkedin)}
-                          </a>
-                        </p>
+                        {formData.personalInfo.fields.map(field => {
+                          if (['name', 'location', 'phone', 'email'].includes(field.id)) {
+                            return null;
+                          }
+                          
+                          if (field.id === 'linkedin' && field.value) {
+                            return (
+                              <p key={field.id}>
+                                <a
+                                  href={field.value}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {field.value}
+                                </a>
+                              </p>
+                            );
+                          }
+                          
+                          if (field.value) {
+                            return (
+                              <p key={field.id}>
+                                <span className="font-semibold">{field.label}:</span> {field.value}
+                              </p>
+                            );
+                          }
+                          
+                          return null;
+                        })}
                       </div>
                     </div>
                   );
@@ -971,11 +1044,13 @@ export default function ResumeBuilder() {
                     <div key={section} className="mb-6">
                       <h2 className="text-lg font-bold border-b pb-1 mb-2">{formData.sectionTitles.skills}</h2>
                       <ul className="text-sm">
-                        <li className="mb-1"><span className="font-semibold">Languages:</span> {formData.skills.languages}</li>
-                        <li className="mb-1"><span className="font-semibold">Technologies:</span> {formData.skills.technologies}</li>
-                        <li className="mb-1"><span className="font-semibold">Tools:</span> {formData.skills.tools}</li>
-                        <li className="mb-1"><span className="font-semibold">Frameworks & Methodologies:</span> {formData.skills.frameworks}</li>
-                        <li className="mb-1"><span className="font-semibold">Soft Skills:</span> {formData.skills.softSkills}</li>
+                        {formData.skills.fields.map(field => (
+                          field.value ? (
+                            <li key={field.id} className="mb-1">
+                              <span className="font-semibold">{field.label}:</span> {field.value}
+                            </li>
+                          ) : null
+                        ))}
                       </ul>
                     </div>
                   );
